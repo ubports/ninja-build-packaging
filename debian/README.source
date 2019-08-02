@@ -1,0 +1,5 @@
+There has been one change to the source for Debian packaging.  That change is
+to generate the re2c files in the src directory when bootstrap.py is run.  This
+is necessary because ninja -t clean removes them.  This can be fixed via a
+"git reset --hard" but the package shouldn't be doing that.
+

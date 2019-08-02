@@ -1,0 +1,48 @@
+#!/usr/bin/make -f
+
+export DEB_CFLAGS_MAINT_APPEND=$(shell dpkg-buildflags --get CPPFLAGS)
+export DEB_CXXFLAGS_MAINT_APPEND=$(shell dpkg-buildflags --get CPPFLAGS)
+export DEB_LDFLAGS_MAINT_APPEND=-Wl,--as-needed
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	./configure.py --bootstrap --verbose
+
+override_dh_auto_build:
+	./ninja -v all
+ifeq (,$(filter nodoc,$(DEB_BUILD_PROFILES)))
+	./ninja -v manual
+	help2man --include=debian/ninja.1.in --output=build/ninja.1.org --no-info --no-discard-stderr ./ninja
+	sed 's/\(default=\)[0-9]\+ on this system/\1\#CPUs/' build/ninja.1.org > build/ninja.1
+	if cmp --silent build/ninja.1.org build/ninja.1; then echo "sed pattern not found"; exit 1; fi
+endif
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	# Deliberately ignore errors from ulimit.
+	# It allows more tests to run but some archs/buildds have a lower hard limit.
+	sh -c "ulimit -n 2000; ./ninja_test"
+endif
+
+override_dh_auto_install:
+	# noop
+
+override_dh_auto_clean:
+	# noop
+
+override_dh_clean:
+	dh_clean
+	test -x ninja && ./ninja -t clean || true
+	find -type f -iname "*.pyc" | xargs rm -f
+	rm -f null.o
+	rm -f build.ninja
+	rm -rf build
+
+override_dh_install-arch:
+	dh_install
+	mv debian/ninja-build/usr/share/bash-completion/completions/bash-completion \
+	   debian/ninja-build/usr/share/bash-completion/completions/ninja
+	mv debian/ninja-build/usr/share/zsh/vendor-completions/zsh-completion \
+	   debian/ninja-build/usr/share/zsh/vendor-completions/_ninja

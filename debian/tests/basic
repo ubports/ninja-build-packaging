@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -eu
+
+WORKDIR=$(mktemp -d)
+trap "rm -rf $WORKDIR" 0 INT QUIT ABRT PIPE TERM
+cd $WORKDIR
+
+cat <<EOF > build.ninja
+builddir = build
+
+cc = gcc
+cflags = -Wall
+
+rule compile
+  command = \$cc \$cflags -c \$in -o \$out
+
+rule link
+  command = \$cc \$in -o \$out
+
+build prog.o: compile prog.c
+build prog: link prog.o
+
+default prog
+EOF
+cat <<EOF > prog.c
+int main(int argc, char **argv) {
+  return 0;
+}
+EOF
+ninja
+./prog
