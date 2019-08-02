@@ -3,7 +3,7 @@ Section: devel
 Priority: optional
 Maintainer: Felix Geyer <fgeyer@debian.org>
 Build-Depends: asciidoc <!nodoc>,
-               debhelper-compat (= 12),
+               debhelper (>= 9),
                docbook-xml <!nodoc>,
                docbook-xsl <!nodoc>,
                help2man <!nodoc>,

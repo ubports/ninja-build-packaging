@@ -1,3 +1,9 @@
+ninja-build (1.9.0-1ubports1) xenial; urgency=medium
+
+  * Import to UBPorts
+
+ -- TheKit <nekit1000@gmail.com>  Sat, 03 Aug 2019 16:22:54 +0200
+
 ninja-build (1.9.0-2) unstable; urgency=medium
 
   * Make build reproducible again. (Closes: #932117)
